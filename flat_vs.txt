@@ -1,0 +1,80 @@
+//the version of GLSL
+//the same as #version 330 core
+//the following can omit "core" because "core" is used by default
+#version 330
+
+//the vertex attribute is declared by "in"
+//"layout(location = n)" enables our main.cpp to use (set) its vertex attribute by location number "n"
+//ex: the first parameter of "glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)" means that this function want to set the vertex attribute with location number "0"
+
+layout(location=0) in vec3 position;
+layout(location=1) in vec2 texcoord;
+layout(location=2) in vec3 normal;
+
+// uniform variable can be viewed as a constant
+// you can set the uniform variable by glUniformXXXXXXXX
+// HINT: I do not use model matrix here, but you might need it
+//uniform is like vertex attribute, but it is "global"
+//"global" means that a uniform variable is unique, can be accessed from any shader at anytime , and will keep value until you update it
+//model is used to do translate, rotate, and scale
+//vp is the result of projection * view (reverse order)
+
+uniform mat4 model;
+uniform mat4 vp;
+
+//the light position and view position
+const vec3 light_position = vec3(6.0, 10.0, 5.0);
+const vec3 view_position = vec3(0.0,20.0,0.0);
+
+// 'out' means vertex shader output for fragment shader
+// fNormal will be interpolated before passing to fragment shader
+//fTexcoord will be sent to fragment shader
+//in this case, the fTexcoord in vs.txt is the same as fTexcoord in fs.txt
+//but uniform cannot do it because it is "global"
+
+//"flat" means that it won't be interpolated
+flat out float light;
+
+flat out vec2 fTexcoord;
+
+void main()
+{
+
+	fTexcoord=texcoord;
+	
+	//the postion in the world
+	vec3 world_position = mat3(model) * position;
+	//the normal in the world
+	vec3 world_normal = normalize(mat3(model) * normal);
+	
+	//the light direction
+	vec3 L = normalize(light_position - world_position);
+	//the view direction
+	vec3 V = normalize(view_position - world_position);
+	
+	//the the cosine of light direction and world normal, which cannot be negative
+	float diffuse =  max(0.0, dot(L, world_normal));
+	
+	//the reflect light
+	float specular = 0;
+	
+	//to ensure if the surface can be seen or not 
+	if(diffuse > 0.0)
+	{
+		//the reflect light direction
+		vec3 R = -normalize(reflect(L, world_normal));
+		//to calculate the specular by dot(reflect light direction , view direction), which cannot be negative
+		specular = 5 * pow( max(0, dot(R, V)), 64);
+	}
+	
+	//the surrounding light
+	float ambient = 0.1 * diffuse;
+	
+	//the light value
+	light = diffuse + specular + ambient;
+	
+	//the implementation of mvp (projection * view * model)
+	//position is our original location in local space
+	//vec4(position,1.0) => vec4(position,2.0) the objects will be smaller
+	gl_Position=vp*model*vec4(position, 1);
+}

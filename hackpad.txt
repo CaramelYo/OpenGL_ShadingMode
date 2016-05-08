@@ -1,0 +1,7 @@
+VBO & VAO
+VBO(vertex buffer object) 是用來儲存我們想畫的點的資訊
+儲存資訊例如: 位置(position), 顏色(color), texture coordinate
+我們需要手動去儲存每一個VBO的資訊, 畫的時候也是需要讀取每一個VBO, 但當我們有很多的VBO時, 這會使得我們的code非常繁瑣
+於是就有了VAO(vertex array object)
+當我們設定並開啟VAO, 她會去儲存(指向) 我們在關閉此VAO前 所設定的VBO
+當我們把VBO全都設定完後, 只要使用VAO就能畫出所有儲存(指向)的VBO, 就不用call每一個VBO來畫了 (偷懶)

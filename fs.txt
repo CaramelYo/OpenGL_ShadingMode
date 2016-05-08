@@ -1,0 +1,20 @@
+//the version of GLSL
+#version 330
+
+// Default color buffer location is 0
+// If you create framebuffer your own, you need to take care of it
+//output of color
+layout(location=0) out vec4 color;
+
+//be changed by fTexcoord in vs.txt
+in vec2 fTexcoord;
+
+//texture objects is declared as "sampler" type in GLSL
+//sampler1D, sampler2D,etc. 
+uniform sampler2D uSampler;
+
+void main()
+{
+	//the texture fuction will sample the color value using the texture parameters (first parameter), and then output the texture at the texture coordinate(second parameter)
+	color=texture( uSampler,fTexcoord);
+}

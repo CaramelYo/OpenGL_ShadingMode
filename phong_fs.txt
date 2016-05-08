@@ -1,0 +1,60 @@
+//the version of GLSL
+#version 330
+
+// Default color buffer location is 0
+// If you create framebuffer your own, you need to take care of it
+//output of color
+layout(location=0) out vec4 color;
+
+//the light position and view position
+const vec3 light_position = vec3(6.0, 10.0, 5.0);
+const vec3 view_position = vec3(0.0,20.0,0.0);
+
+//be changed by fTexcoord in vs.txt
+
+in vec2 fTexcoord;
+
+//from vertex shader
+in vec3 world_normal;
+
+//from vertex shader
+in vec3 world_position;
+
+/***to calculate the light, color in fragment shader***/
+
+//texture objects is declared as "sampler" type in GLSL
+//sampler1D, sampler2D,etc. 
+uniform sampler2D uSampler;
+
+void main()
+{
+	//the light direction
+	vec3 L = normalize(light_position - world_position);
+	//the view direction
+	vec3 V = normalize(view_position - world_position);
+	
+	//it could not be normalized after it be interpolated
+	vec3 normal = normalize(world_normal);
+	
+	//the the cosine of light direction and world normal, which cannot be negative
+	float diffuse =  max(0.0, dot(L, normal));
+	
+	//the reflect light
+	float specular = 0;
+	
+	//to ensure if the surface can be seen or not 
+	if(diffuse > 0.0)
+	{
+		vec3 R = -normalize(reflect(L, normal));
+		//to calculate the specular by dot(reflect light direction , view direction), which cannot be negative
+		specular = 5 * pow( max(0, dot(R, V)), 64);
+	}
+	
+	//the surrounding light
+	float ambient = 0.1 * diffuse;
+	
+	//the light value
+	float light = diffuse + specular + ambient;
+	
+	color = texture(uSampler,fTexcoord) * vec4(light, light, light, 1);
+}
