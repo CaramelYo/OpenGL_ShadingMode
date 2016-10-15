@@ -35,7 +35,7 @@ const vec3 view_position = vec3(0.0,20.0,0.0);
 //"flat" means that it won't be interpolated
 flat out float light;
 
-flat out vec2 fTexcoord;
+out vec2 fTexcoord;
 
 void main()
 {
